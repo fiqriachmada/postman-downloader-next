@@ -1,5 +1,13 @@
 const POSTMAN_API_BASE = 'https://api.getpostman.com';
 
+export interface PostmanUser {
+  id?: string;
+  username?: string;
+  email?: string;
+  fullName?: string;
+  name?: string;
+}
+
 export async function fetchCollections(workspaceId: string, apiKey: string) {
   if (!workspaceId || !apiKey) return [];
 
@@ -52,4 +60,22 @@ export async function fetchWorkspace(workspaceId: string, apiKey: string) {
 
   const data = await response.json();
   return data.workspace;
+}
+
+export async function fetchCurrentUser(apiKey: string): Promise<PostmanUser | null> {
+  if (!apiKey) return null;
+
+  const response = await fetch(`${POSTMAN_API_BASE}/me`, {
+    headers: {
+      'X-Api-Key': apiKey,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to validate API key');
+  }
+
+  const data = await response.json();
+  return data.user || null;
 }
