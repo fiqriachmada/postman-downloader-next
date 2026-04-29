@@ -1,58 +1,63 @@
-'use client';
+"use client"
 
-import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useWorkspaceStore } from '@/lib/store';
+import { useEffect, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useWorkspaceStore } from "@/lib/store"
 
 export function useSyncUrlState() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { workspaceId, loadWorkspace, hasHydrated } = useWorkspaceStore();
-  const urlWorkspaceId = searchParams.get('workspaceId');
-  
-  // Track if we are currently updating the URL to prevent re-syncing from it
-  const isUpdatingUrl = useRef(false);
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { workspaceId, loadWorkspace, hasHydrated } = useWorkspaceStore()
+  const urlWorkspaceId = searchParams.get("workspaceId")
 
-  // 1. Initial Sync: Only on mount (after hydration)
-  const hasInitiallySynced = useRef(false);
+  // Lock mechanism to prevent sync loops
+  const isUpdatingUrl = useRef(false)
+  const hasInitiallySynced = useRef(false)
+
+  // PARTICLE 1: Initial Sync (From URL to Store on first load)
   useEffect(() => {
     if (hasHydrated && !hasInitiallySynced.current) {
       if (urlWorkspaceId && urlWorkspaceId !== workspaceId) {
-        loadWorkspace(urlWorkspaceId);
+        loadWorkspace(urlWorkspaceId)
       }
-      hasInitiallySynced.current = true;
+      hasInitiallySynced.current = true
     }
-  }, [hasHydrated, urlWorkspaceId, workspaceId, loadWorkspace]);
+  }, [hasHydrated, urlWorkspaceId, workspaceId, loadWorkspace])
 
-  // 2. Sync Store to URL: Only when workspaceId changes
+  // PARTICLE 2: Store to URL (When workspace changes in app)
   useEffect(() => {
-    if (!hasHydrated || !hasInitiallySynced.current) return;
+    const shouldUpdateUrl =
+      hasHydrated &&
+      hasInitiallySynced.current &&
+      workspaceId !== urlWorkspaceId
 
-    if (workspaceId !== urlWorkspaceId) {
-      isUpdatingUrl.current = true;
-      const params = new URLSearchParams(searchParams.toString());
-      if (workspaceId) {
-        params.set('workspaceId', workspaceId);
-      } else {
-        params.delete('workspaceId');
-      }
-      
-      const newPath = `/?${params.toString()}`;
-      router.replace(newPath, { scroll: false });
-      
-      // Reset the flag after a short delay
-      setTimeout(() => {
-        isUpdatingUrl.current = false;
-      }, 300); // Slightly longer delay to be safe
+    if (shouldUpdateUrl) {
+      isUpdatingUrl.current = true
+      const params = new URLSearchParams(searchParams.toString())
+
+      if (workspaceId) params.set("workspaceId", workspaceId)
+      else params.delete("workspaceId")
+
+      router.replace(`/?${params.toString()}`, { scroll: false })
+
+      // Release lock after a short timeout
+      const timer = setTimeout(() => {
+        isUpdatingUrl.current = false
+      }, 300)
+      return () => clearTimeout(timer)
     }
-  }, [workspaceId, router, searchParams, hasHydrated, urlWorkspaceId]);
+  }, [workspaceId, router, searchParams, hasHydrated, urlWorkspaceId])
 
-  // 3. Sync URL to Store: Handle external changes (Back/Forward)
+  // PARTICLE 3: URL to Store (When user clicks Back/Forward or edits URL manually)
   useEffect(() => {
-    if (!hasHydrated || !hasInitiallySynced.current || isUpdatingUrl.current) return;
+    const shouldUpdateStore =
+      hasHydrated &&
+      hasInitiallySynced.current &&
+      !isUpdatingUrl.current &&
+      urlWorkspaceId !== workspaceId
 
-    if (urlWorkspaceId !== workspaceId) {
-      loadWorkspace(urlWorkspaceId || '');
+    if (shouldUpdateStore) {
+      loadWorkspace(urlWorkspaceId || "")
     }
-  }, [urlWorkspaceId, workspaceId, loadWorkspace, hasHydrated]);
+  }, [urlWorkspaceId, workspaceId, loadWorkspace, hasHydrated])
 }
