@@ -6,10 +6,8 @@ export type SortOrder = 'custom' | 'asc' | 'desc';
 export type InputType = 'url' | 'id';
 
 export interface WorkspaceState {
+  // Global & Auth
   workspaceId: string
-  apiKey: string
-  encodedApiKey: string
-  userProfile: PostmanUser | null
   savedWorkspaces: SavedWorkspace[]
   hasHydrated: boolean
   sortOrder: SortOrder
@@ -30,9 +28,6 @@ export interface WorkspaceState {
 
   // Actions
   setWorkspaceId: (id: string) => void
-  setApiKey: (key: string) => void
-  login: (key: string, profile: PostmanUser) => void
-  logout: () => void
   setHasHydrated: (state: boolean) => void
   setSortOrder: (order: SortOrder) => void
   setInputValue: (value: string) => void

@@ -18,7 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useWorkspaceStore } from '@/lib/store';
+import { useWorkspaceStore } from "@/stores/workspace-store"
+import { useUserProfileStore } from "@/stores/user-profile-store"
 import { SavedWorkspace } from '@/types/saved-workspace-type';
 import { toast } from 'sonner';
 
@@ -120,11 +121,11 @@ function SortableItem({ workspace, isActive, onSelect, onEdit, onDelete }: Sorta
 
 
 export function QuickSelect({ onEdit }: QuickSelectProps) {
+  const { apiKey } = useUserProfileStore();
   const { 
     workspaceId, 
     loadWorkspace,
-    apiKey, 
-    savedWorkspaces, 
+    savedWorkspaces,
     removeSavedWorkspace,
     sortOrder,
     setSortOrder,

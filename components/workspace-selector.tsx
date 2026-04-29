@@ -3,7 +3,7 @@
 import { WorkspaceInput } from "./workspace-input"
 import { QuickSelect } from "./quick-select"
 import { EditWorkspaceDialog } from "./edit-workspace-dialog"
-import { useWorkspaceStore } from "@/lib/store"
+import { useWorkspaceStore } from "@/stores/workspace-store"
 
 export function WorkspaceSelector() {
   const { editingWorkspace, setEditingWorkspace } = useWorkspaceStore()

@@ -3,7 +3,8 @@
 import { Key, Eye, EyeOff, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useWorkspaceStore } from "@/lib/store"
+import { useWorkspaceStore } from "@/stores/workspace-store"
+import { useUserProfileStore } from "@/stores/user-profile-store"
 import { fetchCurrentUser } from "@/lib/api"
 import { toast } from "sonner"
 import {
@@ -20,6 +21,9 @@ export function PostmanSettings() {
     userProfile,
     logout,
     login,
+  } = useUserProfileStore()
+
+  const {
     settingsShowKey: showKey,
     settingsDraftApiKey: draftApiKey,
     settingsIsValidating: isValidating,

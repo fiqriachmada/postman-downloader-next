@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { useWorkspaceStore } from "@/lib/store"
+import { useWorkspaceStore } from "@/stores/workspace-store"
 
 import { toast } from "sonner"
 

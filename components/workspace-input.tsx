@@ -5,7 +5,8 @@ import { Search, Loader2, Link as LinkIcon, Hash, ChevronsUpDown, Check } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { useWorkspaceStore } from '@/lib/store';
+import { useWorkspaceStore } from "@/stores/workspace-store"
+import { useUserProfileStore } from "@/stores/user-profile-store"
 import { extractWorkspaceId, cn } from '@/lib/utils';
 import {
   Popover,
@@ -27,8 +28,8 @@ const inputTypes = [
 ];
 
 export function WorkspaceInput() {
+  const { apiKey } = useUserProfileStore();
   const { 
-    apiKey, 
     loadWorkspace,
     inputValue,
     inputType,

@@ -2,15 +2,16 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { fetchCollections, fetchCollectionDetail } from "@/lib/api"
-import { useWorkspaceStore } from "@/lib/store"
+import { useWorkspaceStore } from "@/stores/workspace-store"
+import { useUserProfileStore } from "@/stores/user-profile-store"
 import { downloadJson, downloadZip, getFormattedTimestamp } from "@/lib/utils"
 import { toast } from "sonner"
 import { Collection } from "@/components/collection-table"
 
 export function useCollections() {
+  const { apiKey } = useUserProfileStore()
   const {
     workspaceId,
-    apiKey,
     savedWorkspaces,
     setDownloadingId,
     setIsBulkDownloading,

@@ -3,7 +3,7 @@
 import { WorkspaceSelector } from "@/components/workspace-selector"
 import { CollectionTable } from "@/components/collection-table"
 import { Separator } from "@/components/ui/separator"
-import { useWorkspaceStore } from "@/lib/store"
+import { useWorkspaceStore } from "@/stores/workspace-store"
 import { PageSkeleton } from "@/components/skeleton/page-skeleton"
 
 export function HomeContent() {

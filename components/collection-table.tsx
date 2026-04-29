@@ -29,9 +29,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCollections } from "@/hooks/use-collections"
-import { useWorkspaceStore } from "@/lib/store"
+import { useWorkspaceStore } from "@/stores/workspace-store"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
+import { useUserProfileStore } from "@/stores/user-profile-store"
 
 export type Collection = {
   id: string
@@ -43,8 +44,8 @@ export type Collection = {
 }
 
 export function CollectionTable() {
+  const { apiKey } = useUserProfileStore()
   const {
-    apiKey,
     workspaceId,
     tableSorting: sorting,
     tableRowSelection: rowSelection,

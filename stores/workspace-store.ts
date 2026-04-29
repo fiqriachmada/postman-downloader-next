@@ -1,7 +1,8 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
-import { fetchWorkspace } from "./api"
+import { fetchWorkspace } from "@/lib/api"
 import { WorkspaceState } from "@/types/workspace-state-type"
+import { useUserProfileStore } from "./user-profile-store"
 
 let loadWorkspaceRequestSeq = 0
 
@@ -9,9 +10,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set, get) => ({
       workspaceId: "",
-      apiKey: "",
-      encodedApiKey: "",
-      userProfile: null,
       savedWorkspaces: [],
       hasHydrated: false,
       sortOrder: "custom",
@@ -31,18 +29,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       editingWorkspace: null,
 
       setWorkspaceId: (id) => set({ workspaceId: id }),
-      setApiKey: (key) => set({ apiKey: key, encodedApiKey: btoa(key) }),
-      login: (key, profile) =>
-        set({
-          apiKey: key,
-          encodedApiKey: btoa(key),
-          userProfile: profile,
-        }),
-      logout: () =>
-        set({
-          userProfile: null,
-          // Keep encodedApiKey for re-validation later
-        }),
       setHasHydrated: (state) => set({ hasHydrated: state }),
       setSortOrder: (order) => set({ sortOrder: order }),
       setInputValue: (val) => set({ inputValue: val }),
@@ -52,7 +38,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       setTableSorting: (updater) =>
         set((state) => ({
           tableSorting:
-            typeof updater === "function" ? updater(state.tableSorting) : updater,
+            typeof updater === "function"
+              ? updater(state.tableSorting)
+              : updater,
         })),
       setTableRowSelection: (updater) =>
         set((state) => ({
@@ -111,8 +99,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       // Integrated Logic to prevent loops
       loadWorkspace: async (id: string) => {
         const requestId = ++loadWorkspaceRequestSeq
-        const { apiKey, savedWorkspaces, setWorkspaceId, addSavedWorkspace } =
-          get()
+        const { savedWorkspaces, setWorkspaceId, addSavedWorkspace } = get()
+        const apiKey = useUserProfileStore.getState().apiKey
 
         // 1. Set the ID immediately
         setWorkspaceId(id)
@@ -138,29 +126,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       },
     }),
     {
-      name: "postman-downloader-storage",
+      name: "workspace-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         workspaceId: state.workspaceId,
-        encodedApiKey: state.encodedApiKey,
-        userProfile: state.userProfile,
         savedWorkspaces: state.savedWorkspaces,
         sortOrder: state.sortOrder,
       }),
-      merge: (persistedState: any, currentState) => {
-        const merged = { ...currentState, ...persistedState }
-        if (merged.userProfile && merged.encodedApiKey) {
-          try {
-            merged.apiKey = atob(merged.encodedApiKey)
-          } catch (e) {
-            merged.apiKey = ""
-          }
-        }
-        return merged
-      },
       onRehydrateStorage: () => (state) => {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("workspace-storage")
+          localStorage.removeItem("workspace-storage-old") // Optional cleanup if needed
         }
         state?.setHasHydrated(true)
       },
