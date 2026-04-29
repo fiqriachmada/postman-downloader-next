@@ -243,20 +243,20 @@ export function CollectionTable() {
   return (
     <div className="space-y-4">
       {/* Table Top Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="px-3 py-1">
             {collections.length} Collections found
           </Badge>
           {selectedCount > 0 && (
-            <div className="flex items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-300">
+            <div className="flex flex-wrap items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-300">
               <Badge variant="secondary" className="px-3 py-1 bg-blue-100 text-blue-700 border-blue-200">
                 {selectedCount} selected
               </Badge>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-7 px-2 text-[10px] uppercase font-bold tracking-wider"
+                className="h-7 px-2 text-[10px] uppercase font-bold tracking-wider sm:text-xs"
                 onClick={() => table.toggleAllRowsSelected(true)}
               >
                 Select All
@@ -264,7 +264,7 @@ export function CollectionTable() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-7 px-2 text-[10px] uppercase font-bold tracking-wider text-muted-foreground"
+                className="h-7 px-2 text-[10px] uppercase font-bold tracking-wider text-muted-foreground sm:text-xs"
                 onClick={() => table.toggleAllRowsSelected(false)}
               >
                 Unselect All
@@ -273,12 +273,12 @@ export function CollectionTable() {
           )}
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
           {selectedCount > 0 && (
             <Button 
               size="sm" 
               variant="default"
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 sm:w-auto"
               onClick={() => handleBulkDownload(selectedRows.map(r => r.original))}
               disabled={isBulkDownloading}
             >
@@ -290,6 +290,7 @@ export function CollectionTable() {
           <Button 
             size="sm" 
             variant="outline"
+            className="w-full sm:w-auto"
             onClick={() => handleBulkDownload(collections)}
             disabled={isBulkDownloading || collections.length === 0}
           >

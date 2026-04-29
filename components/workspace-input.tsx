@@ -74,14 +74,14 @@ export function WorkspaceInput() {
   const currentType = inputTypes.find(t => t.value === inputType);
 
   return (
-    <div className="flex gap-2">
-      <div className="flex-1 flex gap-0">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-2">
+      <div className="flex w-full gap-0">
         <Popover open={typePopoverOpen} onOpenChange={setTypePopoverOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
-              className="w-[110px] justify-between rounded-r-none border-r-0 bg-muted/50 hover:bg-muted/70 px-3"
+              className="w-[110px] shrink-0 justify-between rounded-r-none border-r-0 bg-muted/50 px-3 hover:bg-muted/70"
             >
               <div className="flex items-center gap-2 overflow-hidden">
                 {currentType && <currentType.icon className="w-3.5 h-3.5 shrink-0" />}
@@ -121,7 +121,7 @@ export function WorkspaceInput() {
             </Command>
           </PopoverContent>
         </Popover>
-        <div className="relative flex-1">
+        <div className="relative min-w-0 flex-1">
           <Input
             placeholder={inputType === 'url' ? "Paste Workspace URL..." : "Enter Workspace ID..."}
             value={inputValue}
@@ -136,7 +136,12 @@ export function WorkspaceInput() {
           )}
         </div>
       </div>
-      <Button onClick={handleSearch} variant="secondary" disabled={isLoading} className="shadow-sm">
+      <Button
+        onClick={handleSearch}
+        variant="secondary"
+        disabled={isLoading}
+        className="h-10 w-full shadow-sm sm:w-auto"
+      >
         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
         Load
       </Button>
