@@ -1,16 +1,15 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { WorkspaceInput } from './workspace-input';
-import { QuickSelect } from './quick-select';
-import { EditWorkspaceDialog } from './edit-workspace-dialog';
-import { SavedWorkspace } from '@/lib/store';
+import { WorkspaceInput } from "./workspace-input"
+import { QuickSelect } from "./quick-select"
+import { EditWorkspaceDialog } from "./edit-workspace-dialog"
+import { useWorkspaceStore } from "@/lib/store"
 
 export function WorkspaceSelector() {
-  const [editingWorkspace, setEditingWorkspace] = React.useState<SavedWorkspace | null>(null);
+  const { editingWorkspace, setEditingWorkspace } = useWorkspaceStore()
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       {/* 1. Input Section */}
       <WorkspaceInput />
 
@@ -18,10 +17,10 @@ export function WorkspaceSelector() {
       <QuickSelect onEdit={setEditingWorkspace} />
 
       {/* 3. Dialogs Section */}
-      <EditWorkspaceDialog 
-        workspace={editingWorkspace} 
-        onClose={() => setEditingWorkspace(null)} 
+      <EditWorkspaceDialog
+        workspace={editingWorkspace}
+        onClose={() => setEditingWorkspace(null)}
       />
     </div>
-  );
+  )
 }

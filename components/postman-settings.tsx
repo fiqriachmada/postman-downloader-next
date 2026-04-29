@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Key, Eye, EyeOff, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -15,26 +14,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function PostmanSettings() {
-  const { apiKey, encodedApiKey, userProfile, login, logout } =
-    useWorkspaceStore()
-
-  console.log(userProfile)
-
-  const [showKey, setShowKey] = React.useState(false)
-  const [draftApiKey, setDraftApiKey] = React.useState("")
-  const [isValidating, setIsValidating] = React.useState(false)
-
-  React.useEffect(() => {
-    if (apiKey) {
-      setDraftApiKey(apiKey)
-    } else if (encodedApiKey) {
-      try {
-        setDraftApiKey(atob(encodedApiKey))
-      } catch (e) {
-        // ignore
-      }
-    }
-  }, [apiKey, encodedApiKey])
+  const {
+    apiKey,
+    encodedApiKey,
+    userProfile,
+    logout,
+    login,
+    settingsShowKey: showKey,
+    settingsDraftApiKey: draftApiKey,
+    settingsIsValidating: isValidating,
+    setSettingsShowKey: setShowKey,
+    setSettingsDraftApiKey: setDraftApiKey,
+    setSettingsIsValidating: setIsValidating,
+  } = useWorkspaceStore()
 
   const handleValidate = async () => {
     const cleanedKey = draftApiKey.trim()
@@ -116,7 +108,10 @@ export function PostmanSettings() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={logout}
+                onClick={() => {
+                  logout()
+                  toast.success("Logout successfully")
+                }}
                 className="w-full text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50"
               >
                 <LogOut className="mr-2 h-4 w-4" />

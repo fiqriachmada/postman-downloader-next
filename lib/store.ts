@@ -1,37 +1,7 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import { fetchWorkspace } from "./api"
-import { PostmanUser } from "@/types/postman-user-type"
-
-export interface SavedWorkspace {
-  id: string
-  label: string
-  originalLabel?: string
-}
-
-interface WorkspaceState {
-  workspaceId: string
-  apiKey: string
-  encodedApiKey: string
-  userProfile: PostmanUser | null
-  savedWorkspaces: SavedWorkspace[]
-  hasHydrated: boolean
-
-  // Actions
-  setWorkspaceId: (id: string) => void
-  setApiKey: (key: string) => void
-  login: (key: string, profile: PostmanUser) => void
-  logout: () => void
-  setHasHydrated: (state: boolean) => void
-
-  addSavedWorkspace: (workspace: SavedWorkspace) => void
-  removeSavedWorkspace: (id: string) => void
-  updateSavedWorkspace: (id: string, newLabel: string) => void
-  resetWorkspaceName: (id: string) => void
-
-  // New: Smart Action to load and save
-  loadWorkspace: (id: string) => Promise<void>
-}
+import { WorkspaceState } from "@/types/workspace-state-type"
 
 let loadWorkspaceRequestSeq = 0
 
@@ -44,6 +14,21 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       userProfile: null,
       savedWorkspaces: [],
       hasHydrated: false,
+      sortOrder: "custom",
+      inputValue: "",
+      inputType: "url",
+      typePopoverOpen: false,
+      isLoadingWorkspace: false,
+      tableSorting: [],
+      tableRowSelection: {},
+      downloadingId: null,
+      isBulkDownloading: false,
+      editWorkspaceLabel: "",
+      settingsShowKey: false,
+      settingsDraftApiKey: "",
+      settingsIsValidating: false,
+      quickSelectOpen: false,
+      editingWorkspace: null,
 
       setWorkspaceId: (id) => set({ workspaceId: id }),
       setApiKey: (key) => set({ apiKey: key, encodedApiKey: btoa(key) }),
@@ -59,6 +44,38 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           // Keep encodedApiKey for re-validation later
         }),
       setHasHydrated: (state) => set({ hasHydrated: state }),
+      setSortOrder: (order) => set({ sortOrder: order }),
+      setInputValue: (val) => set({ inputValue: val }),
+      setInputType: (val) => set({ inputType: val }),
+      setTypePopoverOpen: (val) => set({ typePopoverOpen: val }),
+      setIsLoadingWorkspace: (val) => set({ isLoadingWorkspace: val }),
+      setTableSorting: (updater) =>
+        set((state) => ({
+          tableSorting:
+            typeof updater === "function" ? updater(state.tableSorting) : updater,
+        })),
+      setTableRowSelection: (updater) =>
+        set((state) => ({
+          tableRowSelection:
+            typeof updater === "function"
+              ? updater(state.tableRowSelection)
+              : updater,
+        })),
+      setDownloadingId: (id) => set({ downloadingId: id }),
+      setIsBulkDownloading: (val) => set({ isBulkDownloading: val }),
+      setEditWorkspaceLabel: (label) => set({ editWorkspaceLabel: label }),
+      setSettingsShowKey: (val) => set({ settingsShowKey: val }),
+      setSettingsDraftApiKey: (val) => set({ settingsDraftApiKey: val }),
+      setSettingsIsValidating: (val) => set({ settingsIsValidating: val }),
+      setQuickSelectOpen: (val) => set({ quickSelectOpen: val }),
+      setEditingWorkspace: (val) => set({ editingWorkspace: val }),
+      reorderWorkspaces: (startIndex, endIndex) =>
+        set((state) => {
+          const newWorkspaces = Array.from(state.savedWorkspaces)
+          const [removed] = newWorkspaces.splice(startIndex, 1)
+          newWorkspaces.splice(endIndex, 0, removed)
+          return { savedWorkspaces: newWorkspaces, sortOrder: "custom" }
+        }),
 
       addSavedWorkspace: (workspace) => {
         const { savedWorkspaces } = get()
@@ -128,6 +145,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         encodedApiKey: state.encodedApiKey,
         userProfile: state.userProfile,
         savedWorkspaces: state.savedWorkspaces,
+        sortOrder: state.sortOrder,
       }),
       merge: (persistedState: any, currentState) => {
         const merged = { ...currentState, ...persistedState }

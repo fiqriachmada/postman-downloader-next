@@ -27,12 +27,18 @@ const inputTypes = [
 ];
 
 export function WorkspaceInput() {
-  const [inputValue, setInputValue] = React.useState('');
-  const [inputType, setInputType] = React.useState<'url' | 'id'>('url');
-  const [typePopoverOpen, setTypePopoverOpen] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  
-  const { apiKey, loadWorkspace } = useWorkspaceStore();
+  const { 
+    apiKey, 
+    loadWorkspace,
+    inputValue,
+    inputType,
+    typePopoverOpen,
+    isLoadingWorkspace,
+    setInputValue,
+    setInputType,
+    setTypePopoverOpen,
+    setIsLoadingWorkspace
+  } = useWorkspaceStore();
 
   const handleSearch = async () => {
     const trimmedInput = inputValue.trim();
@@ -64,9 +70,9 @@ export function WorkspaceInput() {
     }
 
     if (id) {
-      setIsLoading(true);
+      setIsLoadingWorkspace(true);
       await loadWorkspace(id);
-      setIsLoading(false);
+      setIsLoadingWorkspace(false);
       setInputValue('');
     }
   };
@@ -129,7 +135,7 @@ export function WorkspaceInput() {
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="rounded-l-none border-l-1 focus-visible:ring-offset-0"
           />
-          {isLoading && (
+          {isLoadingWorkspace && (
             <div className="absolute right-3 top-2.5">
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
             </div>
@@ -139,10 +145,10 @@ export function WorkspaceInput() {
       <Button
         onClick={handleSearch}
         variant="secondary"
-        disabled={isLoading}
+        disabled={isLoadingWorkspace}
         className="h-10 w-full shadow-sm sm:w-auto"
       >
-        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
+        {isLoadingWorkspace ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
         Load
       </Button>
     </div>
