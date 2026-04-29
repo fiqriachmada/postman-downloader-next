@@ -15,10 +15,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function PostmanSettings() {
-  const { apiKey, encodedApiKey, userProfile, logout, login, hasHydrated } =
+  const { userProfile, logout, login, hasHydrated: userHasHydrated } =
     useUserProfileStore()
 
   const {
+    hasHydrated: workspaceHasHydrated,
     settingsShowKey: showKey,
     settingsDraftApiKey: draftApiKey,
     settingsIsValidating: isValidating,
@@ -27,7 +28,11 @@ export function PostmanSettings() {
     setSettingsIsValidating: setIsValidating,
   } = useWorkspaceStore()
 
+  const isHydrated = userHasHydrated && workspaceHasHydrated
+
   const handleValidate = async () => {
+    if (!isHydrated) return
+
     const cleanedKey = draftApiKey.trim()
 
     if (!cleanedKey) {
@@ -58,7 +63,7 @@ export function PostmanSettings() {
     <div className="flex justify-end">
       <Popover>
         <PopoverTrigger asChild>
-          {!hasHydrated ? (
+          {!isHydrated ? (
             <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted" />
           ) : userProfile ? (
             <Avatar className="h-8 w-8 shrink-0 border bg-muted">
@@ -132,6 +137,7 @@ export function PostmanSettings() {
                     placeholder="PMAK-..."
                     value={draftApiKey}
                     onChange={(e) => setDraftApiKey(e.target.value)}
+                    disabled={!isHydrated || isValidating}
                     className="pr-10"
                   />
                   <Button
@@ -140,6 +146,7 @@ export function PostmanSettings() {
                     size="sm"
                     className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowKey(!showKey)}
+                    disabled={!isHydrated || isValidating}
                   >
                     {showKey ? (
                       <EyeOff className="h-4 w-4" />
@@ -151,7 +158,7 @@ export function PostmanSettings() {
                 <Button
                   type="button"
                   onClick={handleValidate}
-                  disabled={isValidating}
+                  disabled={!isHydrated || isValidating}
                 >
                   {isValidating ? "Validating..." : "Validate"}
                 </Button>

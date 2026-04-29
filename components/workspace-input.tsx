@@ -92,7 +92,6 @@ export function WorkspaceInput() {
   }
 
   const currentType = inputTypes.find((t) => t.value === inputType)
-  console.log("typePopoverOpen", typePopoverOpen)
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-2">
