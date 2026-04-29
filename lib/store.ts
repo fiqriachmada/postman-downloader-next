@@ -28,6 +28,8 @@ interface WorkspaceState {
   loadWorkspace: (id: string) => Promise<void>;
 }
 
+let loadWorkspaceRequestSeq = 0;
+
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set, get) => ({
@@ -73,6 +75,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
       // Integrated Logic to prevent loops
       loadWorkspace: async (id: string) => {
+        const requestId = ++loadWorkspaceRequestSeq;
         const { apiKey, savedWorkspaces, setWorkspaceId, addSavedWorkspace } = get();
         
         // 1. Set the ID immediately
@@ -87,6 +90,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         // 4. Fetch name and save
         try {
           const workspace = await fetchWorkspace(id, apiKey);
+          // Ignore stale async results when user switched workspace quickly.
+          if (requestId !== loadWorkspaceRequestSeq) return;
+
           if (workspace && workspace.name) {
             addSavedWorkspace({ id, label: workspace.name });
           }
