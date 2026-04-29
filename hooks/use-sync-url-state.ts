@@ -10,54 +10,44 @@ export function useSyncUrlState() {
   const { workspaceId, loadWorkspace, hasHydrated } = useWorkspaceStore()
   const urlWorkspaceId = searchParams.get("workspaceId")
 
-  // Lock mechanism to prevent sync loops
-  const isUpdatingUrl = useRef(false)
   const hasInitiallySynced = useRef(false)
+  const lastAppliedUrlWorkspaceId = useRef<string | null>(null)
 
-  // PARTICLE 1: Initial Sync (From URL to Store on first load)
+  // Source of truth: URL workspaceId when present. This also covers back/forward edits.
   useEffect(() => {
-    if (hasHydrated && !hasInitiallySynced.current) {
-      if (urlWorkspaceId && urlWorkspaceId !== workspaceId) {
-        loadWorkspace(urlWorkspaceId)
-      }
+    if (!hasHydrated) return
+
+    const normalizedUrlId = urlWorkspaceId || ""
+
+    if (!hasInitiallySynced.current) {
       hasInitiallySynced.current = true
+      lastAppliedUrlWorkspaceId.current = normalizedUrlId
+
+      if (normalizedUrlId && normalizedUrlId !== workspaceId) {
+        loadWorkspace(normalizedUrlId)
+      }
+      return
+    }
+
+    if (lastAppliedUrlWorkspaceId.current === normalizedUrlId) return
+    lastAppliedUrlWorkspaceId.current = normalizedUrlId
+
+    if (normalizedUrlId !== workspaceId) {
+      loadWorkspace(normalizedUrlId)
     }
   }, [hasHydrated, urlWorkspaceId, workspaceId, loadWorkspace])
 
-  // PARTICLE 2: Store to URL (When workspace changes in app)
+  // Keep URL in sync for app-driven workspace changes.
   useEffect(() => {
-    const shouldUpdateUrl =
-      hasHydrated &&
-      hasInitiallySynced.current &&
-      workspaceId !== urlWorkspaceId
+    if (!hasHydrated || !hasInitiallySynced.current) return
+    if (workspaceId === (urlWorkspaceId || "")) return
 
-    if (shouldUpdateUrl) {
-      isUpdatingUrl.current = true
-      const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString())
 
-      if (workspaceId) params.set("workspaceId", workspaceId)
-      else params.delete("workspaceId")
+    if (workspaceId) params.set("workspaceId", workspaceId)
+    else params.delete("workspaceId")
 
-      router.replace(`/?${params.toString()}`, { scroll: false })
-
-      // Release lock after a short timeout
-      const timer = setTimeout(() => {
-        isUpdatingUrl.current = false
-      }, 300)
-      return () => clearTimeout(timer)
-    }
-  }, [workspaceId, router, searchParams, hasHydrated, urlWorkspaceId])
-
-  // PARTICLE 3: URL to Store (When user clicks Back/Forward or edits URL manually)
-  useEffect(() => {
-    const shouldUpdateStore =
-      hasHydrated &&
-      hasInitiallySynced.current &&
-      !isUpdatingUrl.current &&
-      urlWorkspaceId !== workspaceId
-
-    if (shouldUpdateStore) {
-      loadWorkspace(urlWorkspaceId || "")
-    }
-  }, [urlWorkspaceId, workspaceId, loadWorkspace, hasHydrated])
+    const query = params.toString()
+    router.replace(query ? `/?${query}` : "/", { scroll: false })
+  }, [workspaceId, urlWorkspaceId, searchParams, router, hasHydrated])
 }
