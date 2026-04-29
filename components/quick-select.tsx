@@ -55,7 +55,7 @@ export function QuickSelect({ onEdit }: QuickSelectProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
       <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
         Quick Select:
       </span>
@@ -67,10 +67,10 @@ export function QuickSelect({ onEdit }: QuickSelectProps) {
             aria-expanded={open}
             className="w-full justify-between overflow-hidden shadow-sm"
           >
-            <span className="truncate">
+            <span className="truncate text-left">
               {selectedWorkspace
                 ? selectedWorkspace.label
-                : workspaceId || "Select or enter workspace..."}
+                : "Select saved workspace..."}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -86,7 +86,7 @@ export function QuickSelect({ onEdit }: QuickSelectProps) {
                     {savedWorkspaces.map((workspace) => (
                       <CommandItem
                         key={workspace.id}
-                        value={workspace.id}
+                        value={`${workspace.label} ${workspace.id}`}
                         className="flex items-center justify-between group cursor-pointer"
                         onSelect={() => {
                           if (!apiKey) {
@@ -114,7 +114,7 @@ export function QuickSelect({ onEdit }: QuickSelectProps) {
                             size="icon"
                             className="h-7 w-7 hover:bg-muted"
                             onPointerDown={(e) => e.stopPropagation()}
-                            onClick={(e) => {
+                            onClick={() => {
                               onEdit(workspace);
                               setOpen(false);
                             }}
