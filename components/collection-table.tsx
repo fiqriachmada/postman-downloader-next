@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCollections, fetchCollectionDetail } from '@/lib/api';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export type Collection = {
   id: string;
@@ -223,9 +224,45 @@ export function CollectionTable() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Fetching collections...</p>
+      <div className="space-y-4">
+        {/* Table Top Actions Skeleton */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <Skeleton className="h-6 w-32 rounded-full" />
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
+            <Skeleton className="h-9 w-full sm:w-36" />
+          </div>
+        </div>
+
+        {/* Table Skeleton */}
+        <div className="rounded-md border bg-card shadow-sm overflow-hidden">
+          <div className="border-b bg-muted/50 p-4 flex gap-4">
+             <Skeleton className="h-4 w-4" />
+             <Skeleton className="h-4 w-[150px]" />
+             <Skeleton className="h-4 w-[250px]" />
+             <Skeleton className="h-4 w-[100px] ml-auto" />
+          </div>
+          <div className="p-4 space-y-4">
+             {Array.from({ length: 5 }).map((_, i) => (
+               <div key={i} className="flex gap-4 items-center">
+                 <Skeleton className="h-4 w-4" />
+                 <Skeleton className="h-5 w-[200px]" />
+                 <Skeleton className="h-4 w-[300px]" />
+                 <Skeleton className="h-8 w-[80px] ml-auto" />
+               </div>
+             ))}
+          </div>
+        </div>
+
+        {/* Pagination Skeleton */}
+        <div className="flex items-center justify-between py-4">
+          <Skeleton className="h-4 w-[250px]" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
       </div>
     );
   }
