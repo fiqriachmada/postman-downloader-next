@@ -42,8 +42,6 @@ export function PostmanSettings() {
 
       const displayName =
         user?.fullName || user?.name || user?.username || "Unknown User"
-      const email = user?.email || "-"
-      const avatarUrl = user?.avatar || "https://www.postman.com/favicon.ico"
 
       login(cleanedKey, { ...user })
 

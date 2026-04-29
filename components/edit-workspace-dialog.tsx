@@ -13,13 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useWorkspaceStore } from "@/lib/store"
-import { SavedWorkspace } from "@/types/saved-workspace-type"
+
 import { toast } from "sonner"
 
-interface EditWorkspaceDialogProps {
-  workspace: SavedWorkspace | null
-  onClose: () => void
-}
+import { EditWorkspaceDialogProps } from "@/types/edit-workspace-dialog-props-type"
 
 export function EditWorkspaceDialog({
   workspace,

@@ -1,0 +1,99 @@
+"use client"
+
+import { useQuery } from "@tanstack/react-query"
+import { fetchCollections, fetchCollectionDetail } from "@/lib/api"
+import { useWorkspaceStore } from "@/lib/store"
+import { downloadJson, downloadZip, getFormattedTimestamp } from "@/lib/utils"
+import { toast } from "sonner"
+import { Collection } from "@/components/collection-table"
+
+export function useCollections() {
+  const {
+    workspaceId,
+    apiKey,
+    savedWorkspaces,
+    setDownloadingId,
+    setIsBulkDownloading,
+  } = useWorkspaceStore()
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["collections", workspaceId, apiKey],
+    queryFn: async () => {
+      const allCollections = await fetchCollections(workspaceId, apiKey)
+
+      const filtered = allCollections.filter((c: any) => {
+        const isGrpc =
+          c.name?.toLowerCase().includes("grpc") || c.protocol === "grpc"
+        return !isGrpc
+      })
+
+      return {
+        list: filtered,
+        skippedCount: allCollections.length - filtered.length,
+      }
+    },
+    enabled: !!workspaceId && !!apiKey,
+  })
+
+  const collections = data?.list || []
+
+  const workspaceName =
+    savedWorkspaces.find((w) => w.id === workspaceId)?.label || "workspace"
+
+  const handleDownload = async (collection: Collection) => {
+    if (!apiKey) return
+    setDownloadingId(collection.uid)
+    try {
+      const detail = await fetchCollectionDetail(collection.uid, apiKey)
+      downloadJson(detail, `${collection.name}.json`)
+      toast.success(`Downloaded ${collection.name}`)
+    } catch (err: any) {
+      toast.error(`Failed to download: ${err.message}`)
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const handleBulkDownload = async (items: Collection[]) => {
+    if (!apiKey || items.length === 0) return
+
+    const isSingle = items.length === 1
+    setIsBulkDownloading(true)
+    const toastId = toast.loading(`Preparing ${items.length} collection(s)...`)
+
+    try {
+      if (isSingle) {
+        const detail = await fetchCollectionDetail(items[0].uid, apiKey)
+        downloadJson(detail, `${items[0].name}.json`)
+      } else {
+        const files = await Promise.all(
+          items.map(async (item) => ({
+            name: item.name,
+            content: await fetchCollectionDetail(item.uid, apiKey),
+          }))
+        )
+        const fileName = `${workspaceName}_${getFormattedTimestamp()}`
+        await downloadZip(files, fileName)
+      }
+      toast.success(
+        isSingle
+          ? "Downloaded successfully"
+          : `ZIP created with ${items.length} collections`,
+        { id: toastId }
+      )
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`, { id: toastId })
+    } finally {
+      setIsBulkDownloading(false)
+    }
+  }
+
+  return {
+    collections,
+    workspaceName,
+    isLoading,
+    error,
+    handleDownload,
+    handleBulkDownload,
+  }
+}

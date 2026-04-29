@@ -39,13 +39,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-interface SortableItemProps {
-  workspace: SavedWorkspace;
-  isActive: boolean;
-  onSelect: () => void;
-  onEdit: (workspace: SavedWorkspace) => void;
-  onDelete: (e: React.MouseEvent | React.PointerEvent, id: string) => void;
-}
+import { QuickSelectProps } from "@/types/quick-select-props-type"
+import { SortableItemProps } from "@/types/sortable-item-props-type"
 
 function SortableItem({ workspace, isActive, onSelect, onEdit, onDelete }: SortableItemProps) {
   const {
@@ -122,9 +117,7 @@ function SortableItem({ workspace, isActive, onSelect, onEdit, onDelete }: Sorta
   );
 }
 
-interface QuickSelectProps {
-  onEdit: (workspace: SavedWorkspace) => void;
-}
+
 
 export function QuickSelect({ onEdit }: QuickSelectProps) {
   const { 
