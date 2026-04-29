@@ -1,5 +1,5 @@
 export interface SavedWorkspace {
   id: string
   label: string
-  originalLabel?: string
+  originalLabel?: string | null
 }

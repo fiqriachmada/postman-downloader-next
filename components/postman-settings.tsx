@@ -15,13 +15,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function PostmanSettings() {
-  const {
-    apiKey,
-    encodedApiKey,
-    userProfile,
-    logout,
-    login,
-  } = useUserProfileStore()
+  const { apiKey, encodedApiKey, userProfile, logout, login, hasHydrated } =
+    useUserProfileStore()
 
   const {
     settingsShowKey: showKey,
@@ -63,13 +58,15 @@ export function PostmanSettings() {
     <div className="flex justify-end">
       <Popover>
         <PopoverTrigger asChild>
-          {userProfile ? (
+          {!hasHydrated ? (
+            <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted" />
+          ) : userProfile ? (
             <Avatar className="h-8 w-8 shrink-0 border bg-muted">
               <AvatarImage
                 src={
                   userProfile?.avatar || "https://www.postman.com/favicon.ico"
                 }
-                alt={userProfile?.name}
+                alt={userProfile?.name || ""}
               />
               <AvatarFallback className="font-medium text-muted-foreground">
                 {userProfile?.name?.charAt(0).toUpperCase()}
@@ -92,7 +89,7 @@ export function PostmanSettings() {
                       userProfile.avatar ||
                       "https://www.postman.com/favicon.ico"
                     }
-                    alt={userProfile.name}
+                    alt={userProfile.name || ""}
                   />
                   <AvatarFallback className="font-medium text-muted-foreground">
                     {userProfile.fullName?.charAt(0).toUpperCase()}

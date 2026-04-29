@@ -4,8 +4,6 @@ import { fetchWorkspace } from "@/lib/api"
 import { WorkspaceState } from "@/types/workspace-state-type"
 import { useUserProfileStore } from "./user-profile-store"
 
-let loadWorkspaceRequestSeq = 0
-
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set, get) => ({
@@ -31,8 +29,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       setWorkspaceId: (id) => set({ workspaceId: id }),
       setHasHydrated: (state) => set({ hasHydrated: state }),
       setSortOrder: (order) => set({ sortOrder: order }),
-      setInputValue: (val) => set({ inputValue: val }),
-      setInputType: (val) => set({ inputType: val }),
+      setInputValue: (val) => {
+        set({ inputValue: val })
+      },
+      setInputType: (val) => {
+        set({ inputType: val })
+      },
       setTypePopoverOpen: (val) => set({ typePopoverOpen: val }),
       setIsLoadingWorkspace: (val) => set({ isLoadingWorkspace: val }),
       setTableSorting: (updater) =>
@@ -98,7 +100,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
       // Integrated Logic to prevent loops
       loadWorkspace: async (id: string) => {
-        const requestId = ++loadWorkspaceRequestSeq
         const { savedWorkspaces, setWorkspaceId, addSavedWorkspace } = get()
         const apiKey = useUserProfileStore.getState().apiKey
 
@@ -115,7 +116,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         try {
           const workspace = await fetchWorkspace(id, apiKey)
           // Ignore stale async results when user switched workspace quickly.
-          if (requestId !== loadWorkspaceRequestSeq) return
+          if (get().workspaceId !== id) return
 
           if (workspace && workspace.name) {
             addSavedWorkspace({ id, label: workspace.name })
