@@ -19,8 +19,9 @@ export const useUserProfileStore = create<UserProfileState>()(
         }),
       logout: () =>
         set({
+          apiKey: "",
+          encodedApiKey: "",
           userProfile: null,
-          // Keep encodedApiKey for re-validation later
         }),
       setHasHydrated: (state) => set({ hasHydrated: state }),
     }),

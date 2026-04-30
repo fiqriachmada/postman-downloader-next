@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useState, useEffect } from "react"
 import { RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,11 +23,14 @@ export function EditWorkspaceDialog({
   workspace,
   onClose,
 }: EditWorkspaceDialogProps) {
-  const {
-    editWorkspaceLabel: newLabel,
-    setEditWorkspaceLabel: setNewLabel,
-    updateSavedWorkspace,
-  } = useWorkspaceStore()
+  const { updateSavedWorkspace } = useWorkspaceStore()
+
+  const [newLabel, setNewLabel] = useState(workspace?.label ?? "")
+
+  // Sync label ketika workspace yang diedit berganti (cegah stale state)
+  useEffect(() => {
+    setNewLabel(workspace?.label ?? "")
+  }, [workspace?.id])
 
   const handleSave = () => {
     if (workspace && newLabel.trim()) {

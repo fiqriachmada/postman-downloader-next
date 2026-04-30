@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
 import {
   Search,
   Loader2,
@@ -36,17 +36,12 @@ const inputTypes = [
 
 export function WorkspaceInput() {
   const { apiKey } = useUserProfileStore()
-  const {
-    loadWorkspace,
-    inputValue,
-    inputType,
-    typePopoverOpen,
-    isLoadingWorkspace,
-    setInputValue,
-    setInputType,
-    setTypePopoverOpen,
-    setIsLoadingWorkspace,
-  } = useWorkspaceStore()
+  const { loadWorkspace } = useWorkspaceStore()
+
+  const [inputValue, setInputValue] = useState("")
+  const [inputType, setInputType] = useState<"url" | "id">("url")
+  const [typePopoverOpen, setTypePopoverOpen] = useState(false)
+  const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(false)
 
   const handleSearch = async () => {
     const trimmedInput = inputValue.trim()

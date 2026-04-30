@@ -11,32 +11,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       savedWorkspaces: [],
       hasHydrated: false,
       sortOrder: "custom",
-      inputValue: "",
-      inputType: "url",
-      typePopoverOpen: false,
-      isLoadingWorkspace: false,
       tableSorting: [],
       tableRowSelection: {},
       downloadingId: null,
       isBulkDownloading: false,
-      editWorkspaceLabel: "",
-      settingsShowKey: false,
-      settingsDraftApiKey: "",
-      settingsIsValidating: false,
       quickSelectOpen: false,
       editingWorkspace: null,
 
       setWorkspaceId: (id) => set({ workspaceId: id }),
       setHasHydrated: (state) => set({ hasHydrated: state }),
       setSortOrder: (order) => set({ sortOrder: order }),
-      setInputValue: (val) => {
-        set({ inputValue: val })
-      },
-      setInputType: (val) => {
-        set({ inputType: val })
-      },
-      setTypePopoverOpen: (val) => set({ typePopoverOpen: val }),
-      setIsLoadingWorkspace: (val) => set({ isLoadingWorkspace: val }),
       setTableSorting: (updater) =>
         set((state) => ({
           tableSorting:
@@ -53,10 +37,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         })),
       setDownloadingId: (id) => set({ downloadingId: id }),
       setIsBulkDownloading: (val) => set({ isBulkDownloading: val }),
-      setEditWorkspaceLabel: (label) => set({ editWorkspaceLabel: label }),
-      setSettingsShowKey: (val) => set({ settingsShowKey: val }),
-      setSettingsDraftApiKey: (val) => set({ settingsDraftApiKey: val }),
-      setSettingsIsValidating: (val) => set({ settingsIsValidating: val }),
       setQuickSelectOpen: (val) => set({ quickSelectOpen: val }),
       setEditingWorkspace: (val) => set({ editingWorkspace: val }),
       reorderWorkspaces: (startIndex, endIndex) =>

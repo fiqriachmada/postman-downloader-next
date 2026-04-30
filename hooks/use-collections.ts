@@ -46,6 +46,13 @@ export function useCollections() {
     setDownloadingId(collection.uid)
     try {
       const detail = await fetchCollectionDetail(collection.uid, apiKey)
+
+      // Guard: user might have logged out while fetch was in-flight
+      if (!useUserProfileStore.getState().apiKey) {
+        setDownloadingId(null)
+        return
+      }
+
       downloadJson(detail, `${collection.name}.json`)
       toast.success(`Downloaded ${collection.name}`)
     } catch (err: any) {
@@ -65,6 +72,13 @@ export function useCollections() {
     try {
       if (isSingle) {
         const detail = await fetchCollectionDetail(items[0].uid, apiKey)
+
+        // Guard: user logged out mid-flight
+        if (!useUserProfileStore.getState().apiKey) {
+          toast.dismiss(toastId)
+          return
+        }
+
         downloadJson(detail, `${items[0].name}.json`)
       } else {
         const files = await Promise.all(
@@ -73,6 +87,13 @@ export function useCollections() {
             content: await fetchCollectionDetail(item.uid, apiKey),
           }))
         )
+
+        // Guard: user logged out mid-flight
+        if (!useUserProfileStore.getState().apiKey) {
+          toast.dismiss(toastId)
+          return
+        }
+
         const fileName = `${workspaceName}_${getFormattedTimestamp()}`
         await downloadZip(files, fileName)
       }

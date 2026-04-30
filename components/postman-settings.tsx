@@ -1,9 +1,9 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import { Key, Eye, EyeOff, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useWorkspaceStore } from "@/stores/workspace-store"
 import { useUserProfileStore } from "@/stores/user-profile-store"
 import { fetchCurrentUser } from "@/lib/api"
 import { toast } from "sonner"
@@ -15,23 +15,22 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function PostmanSettings() {
-  const { userProfile, logout, login, hasHydrated: userHasHydrated } =
+  const { userProfile, logout, login, hasHydrated } =
     useUserProfileStore()
 
-  const {
-    hasHydrated: workspaceHasHydrated,
-    settingsShowKey: showKey,
-    settingsDraftApiKey: draftApiKey,
-    settingsIsValidating: isValidating,
-    setSettingsShowKey: setShowKey,
-    setSettingsDraftApiKey: setDraftApiKey,
-    setSettingsIsValidating: setIsValidating,
-  } = useWorkspaceStore()
+  const [showKey, setShowKey] = useState(false)
+  const [draftApiKey, setDraftApiKey] = useState("")
+  const [isValidating, setIsValidating] = useState(false)
 
-  const isHydrated = userHasHydrated && workspaceHasHydrated
+  // Track mount state to avoid setState after unmount
+  const isMounted = useRef(true)
+  useEffect(() => {
+    isMounted.current = true
+    return () => { isMounted.current = false }
+  }, [])
 
   const handleValidate = async () => {
-    if (!isHydrated) return
+    if (!hasHydrated) return
 
     const cleanedKey = draftApiKey.trim()
 
@@ -44,6 +43,9 @@ export function PostmanSettings() {
       setIsValidating(true)
       const user = await fetchCurrentUser(cleanedKey)
 
+      // Guard: user might have logged out while fetch was in-flight
+      if (!isMounted.current) return
+
       const displayName =
         user?.fullName || user?.name || user?.username || "Unknown User"
 
@@ -51,11 +53,12 @@ export function PostmanSettings() {
 
       toast.success(`API key valid. Logged in as ${displayName}`)
     } catch (error) {
+      if (!isMounted.current) return
       const message =
         error instanceof Error ? error.message : "Failed to validate API key"
       toast.error(message)
     } finally {
-      setIsValidating(false)
+      if (isMounted.current) setIsValidating(false)
     }
   }
 
@@ -63,7 +66,7 @@ export function PostmanSettings() {
     <div className="flex justify-end">
       <Popover>
         <PopoverTrigger asChild>
-          {!isHydrated ? (
+          {!hasHydrated ? (
             <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted" />
           ) : userProfile ? (
             <Avatar className="h-8 w-8 shrink-0 border bg-muted">
@@ -137,7 +140,7 @@ export function PostmanSettings() {
                     placeholder="PMAK-..."
                     value={draftApiKey}
                     onChange={(e) => setDraftApiKey(e.target.value)}
-                    disabled={!isHydrated || isValidating}
+                    disabled={!hasHydrated || isValidating}
                     className="pr-10"
                   />
                   <Button
@@ -146,7 +149,7 @@ export function PostmanSettings() {
                     size="sm"
                     className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowKey(!showKey)}
-                    disabled={!isHydrated || isValidating}
+                    disabled={!hasHydrated || isValidating}
                   >
                     {showKey ? (
                       <EyeOff className="h-4 w-4" />
@@ -158,7 +161,7 @@ export function PostmanSettings() {
                 <Button
                   type="button"
                   onClick={handleValidate}
-                  disabled={!isHydrated || isValidating}
+                  disabled={!hasHydrated || isValidating}
                 >
                   {isValidating ? "Validating..." : "Validate"}
                 </Button>
