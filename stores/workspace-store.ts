@@ -62,6 +62,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       removeSavedWorkspace: (id) =>
         set((state) => ({
           savedWorkspaces: state.savedWorkspaces.filter((w) => w.id !== id),
+          // Atomically clear active workspace if it's the one being removed
+          workspaceId: state.workspaceId === id ? "" : state.workspaceId,
         })),
 
       updateSavedWorkspace: (id, newLabel) =>
@@ -77,6 +79,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             w.id === id ? { ...w, label: w.originalLabel || w.label } : w
           ),
         })),
+
+      // Atomic: clear all saved workspaces AND active workspaceId in one update
+      clearAllWorkspaces: () =>
+        set({
+          savedWorkspaces: [],
+          workspaceId: "",
+          tableSorting: [],
+          tableRowSelection: {},
+        }),
 
       // Integrated Logic to prevent loops
       loadWorkspace: async (id: string) => {

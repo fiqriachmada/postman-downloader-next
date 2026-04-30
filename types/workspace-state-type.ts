@@ -37,7 +37,8 @@ export interface WorkspaceState {
   removeSavedWorkspace: (id: string) => void
   updateSavedWorkspace: (id: string, newLabel: string) => void
   resetWorkspaceName: (id: string) => void
+  clearAllWorkspaces: () => void
 
-  // New: Smart Action to load and save
+  // Smart Action: fetch workspace name and persist to saved list
   loadWorkspace: (id: string) => Promise<void>
 }

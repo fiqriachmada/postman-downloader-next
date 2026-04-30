@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useEffect } from 'react';
 import { Check, ChevronsUpDown, Trash2, Edit2, Eraser, GripVertical, ArrowDownAZ, ArrowDownZA, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -127,12 +128,24 @@ export function QuickSelect({ onEdit }: QuickSelectProps) {
     loadWorkspace,
     savedWorkspaces,
     removeSavedWorkspace,
+    clearAllWorkspaces,
     sortOrder,
     setSortOrder,
     reorderWorkspaces,
+    setWorkspaceId,
     quickSelectOpen: open,
     setQuickSelectOpen: setOpen
   } = useWorkspaceStore();
+
+  // Guard: after rehydration, workspaceId might point to a workspace no longer in the list
+  useEffect(() => {
+    if (workspaceId && savedWorkspaces.length > 0 && !savedWorkspaces.some(w => w.id === workspaceId)) {
+      setWorkspaceId('')
+    }
+    if (workspaceId && savedWorkspaces.length === 0) {
+      setWorkspaceId('')
+    }
+  }, [workspaceId, savedWorkspaces, setWorkspaceId])
 
   const selectedWorkspace = savedWorkspaces.find((w) => w.id === workspaceId);
 
@@ -163,15 +176,15 @@ export function QuickSelect({ onEdit }: QuickSelectProps) {
   const handleDelete = (e: React.MouseEvent | React.PointerEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
+    // removeSavedWorkspace now atomically clears workspaceId if it matches
     removeSavedWorkspace(id);
-    if (workspaceId === id) loadWorkspace('');
     toast.success('Workspace removed');
   };
 
   const handleClearAll = () => {
     if (confirm('Are you sure you want to clear all saved workspaces?')) {
-      savedWorkspaces.forEach(w => removeSavedWorkspace(w.id));
-      loadWorkspace('');
+      // Atomic: clears savedWorkspaces, workspaceId, tableSorting, tableRowSelection in one update
+      clearAllWorkspaces();
       setOpen(false);
       toast.success('All workspaces cleared');
     }
